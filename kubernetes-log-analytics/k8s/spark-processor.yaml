@@ -1,0 +1,28 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: spark-log-processor
+spec:
+  template:
+    metadata:
+      labels:
+        app: spark-log-processor
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: processor
+          image: spark-log-processor:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: LOG_PATH
+              value: /data/logs/server.log
+            - name: RESULT_PATH
+              value: /data/results/summary.json
+          volumeMounts:
+            - name: logs
+              mountPath: /data
+      volumes:
+        - name: logs
+          persistentVolumeClaim:
+            claimName: logs-pvc
+

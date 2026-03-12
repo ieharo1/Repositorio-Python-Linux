@@ -1,0 +1,38 @@
+version: "3.8"
+
+services:
+  log-generator:
+    build:
+      context: .
+      dockerfile: docker/log-generator.Dockerfile
+    environment:
+      LOG_PATH: /data/logs/server.log
+    volumes:
+      - logs-data:/data
+
+  spark-processor:
+    build:
+      context: .
+      dockerfile: docker/spark-processor.Dockerfile
+    environment:
+      LOG_PATH: /data/logs/server.log
+      RESULT_PATH: /data/results/summary.json
+    volumes:
+      - logs-data:/data
+    depends_on:
+      - log-generator
+
+  results-api:
+    build:
+      context: .
+      dockerfile: docker/api.Dockerfile
+    environment:
+      RESULT_PATH: /data/results/summary.json
+    volumes:
+      - logs-data:/data
+    ports:
+      - "8000:8000"
+
+volumes:
+  logs-data:
+

@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: log-generator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: log-generator
+  template:
+    metadata:
+      labels:
+        app: log-generator
+    spec:
+      containers:
+        - name: generator
+          image: log-generator:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: LOG_PATH
+              value: /data/logs/server.log
+          volumeMounts:
+            - name: logs
+              mountPath: /data
+      volumes:
+        - name: logs
+          persistentVolumeClaim:
+            claimName: logs-pvc
+

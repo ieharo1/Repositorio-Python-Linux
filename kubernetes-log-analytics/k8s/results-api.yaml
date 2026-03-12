@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: results-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: results-api
+  template:
+    metadata:
+      labels:
+        app: results-api
+    spec:
+      containers:
+        - name: api
+          image: log-results-api:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: RESULT_PATH
+              value: /data/results/summary.json
+          ports:
+            - containerPort: 8000
+          volumeMounts:
+            - name: logs
+              mountPath: /data
+      volumes:
+        - name: logs
+          persistentVolumeClaim:
+            claimName: logs-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: results-api
+spec:
+  selector:
+    app: results-api
+  ports:
+    - port: 8000
+      targetPort: 8000
+      nodePort: 30081
+  type: NodePort
+
